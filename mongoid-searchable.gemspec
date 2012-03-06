@@ -1,15 +1,22 @@
 
-Gem::Specification.new do |s|
-  s.name        = 'mongoid-searchable'
-  s.version     = '0.0.0'
-  s.summary     = "Cross-model search indexing for the Mongoid ODM"
-  s.description = "Cross-model search indexing for the Mongoid ODM"
-  s.authors     = [ "Jeff Magee" ]
-  s.email       = 'jmagee.osrc@gmail.com'
-  s.files       = [ "lib/mongoid_searchable.rb" ]
-  s.homepage    = 'https://github.com/jmagee/mongoid-searchable'
+Gem::Specification.new do |gem|
+
+  gem.version     = File.read('VERSION').chomp
+  gem.date        = File.mtime('VERSION').strftime('%Y-%m-%d')
   
-  s.add_dependency("mongoid", ["~> 2.4"])
+  gem.name        = 'mongoid-searchable'
+  gem.summary     = "Cross-model search indexing for the Mongoid ODM"
+  gem.description = "Mongoid Searchable is an extension for the Mongoid ODM facilitating polymorphic search collectiongem."
+  gem.authors     = ['Jeff Magee']
+  gem.email       = 'jmagee.osrc@gmail.com'
+  gem.homepage    = 'https://github.com/jmagee/mongoid-searchable'
   
-  s.add_development_dependency("rspec", ["~> 2.6"])
+  gem.files        = Dir.glob("lib/**/*") + %w(README.md)
+  
+  gem.add_dependency("mongoid", ["~> 2.4"])
+  
+  gem.add_development_dependency("rspec",       ["~> 2.6"])
+  gem.add_development_dependency('redcarpet',   ['~> 2.1'])
+  gem.add_development_dependency('yard',        ['>= 0.7.5'])
+
 end

@@ -3,18 +3,68 @@ require 'spec_helper'
 
 describe Mongoid::Lookup::Model do
   
-  describe '.configure' do
+  describe '.build_lookup' do
     
-    before :all do
+    before :each do
       @model = Class.new
       @model.send(:include, Mongoid::Document)
-      @model.send(:include, Mongoid::Lookup)
+      @model.send(:include, Mongoid::Lookup::Model)
     end
     
-    it 'requires a collection' do
-      #lambda { CleanModel.lookup({}) }.should raise_error(KeyError)
+    it 'defines a lookup reference' do
+      @model.build_lookup :search, :collection => SearchListing
+      lambda { @model::SearchReference }.should_not raise_error
     end
     
+    context 'collection and inherit are not given' do
+      it 'raises a KeyError' do
+        lambda do
+          @model.build_lookup :search, {}
+        end.should raise_error(KeyError)
+      end
+    end
+      
+    context 'collection given' do
+      it 'extends the collection' do
+        @model.build_lookup :search, :collection => SearchListing
+        @model::SearchReference.superclass.should eq(SearchListing)
+      end
+    end
+    
+    context 'inherit is true' do
+      context 'inherit is valid' do
+        before do
+          @model.build_lookup :search, :collection => SearchListing
+          @model_2 = Class.new(@model)
+          @model_2.build_lookup :search, :inherit => true
+        end
+      
+        it 'extends the nearest parent lookup' do
+          @model_2::SearchReference.superclass.should eq(@model::SearchReference)
+        end
+      end
+      
+      context 'inherit is invalid' do
+        it 'raises InheritError' do
+          lambda do
+            @model.build_lookup :search, :inherit => true
+          end.should raise_error(Mongoid::Lookup::InheritError)
+        end
+      end
+    end
+    
+    describe 'lookup reference' do
+      it 'includes Reference' do
+        Person::SearchReference.included_modules.should include(Mongoid::Lookup::Reference)
+      end
+    end
+    
+  end
+  
+  describe '.lookup_reference' do
+    it 'returns the reference model for the given ref name' do
+      Person.lookup_reference(:search).should eq(Person::SearchReference)
+    end
   end
   
 end

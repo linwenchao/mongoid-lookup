@@ -5,6 +5,6 @@ class Person
   include Mongoid::Document
   include Mongoid::Lookup
   
-  lookup :collection => SearchListing
+  lookup :search, :collection => SearchListing
   
 end

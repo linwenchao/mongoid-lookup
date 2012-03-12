@@ -1,6 +1,7 @@
 
 require 'mongoid_lookup/collection'
 require 'mongoid_lookup/model'
+require 'mongoid_lookup/reference'
 
 module Mongoid #:nodoc
   module Lookup #:nodoc
@@ -8,14 +9,15 @@ module Mongoid #:nodoc
     
     module ClassMethods
       
-      # Configures calling model as a search collection
+      # Configures calling model as a lookup collection
       def lookup_collection
         include Collection
       end
       
       # Configures calling model as lookup
-      def lookup options
+      def lookup name, options
         include Model
+        build_lookup(name, options)
       end
       
     end

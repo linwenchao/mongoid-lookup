@@ -4,12 +4,12 @@ Gem::Specification.new do |gem|
   gem.version     = File.read('VERSION').chomp
   gem.date        = File.mtime('VERSION').strftime('%Y-%m-%d')
   
-  gem.name        = 'mongoid-searchable'
-  gem.summary     = "Cross-model search indexing for the Mongoid ODM"
-  gem.description = "Mongoid Searchable is an extension for the Mongoid ODM facilitating polymorphic search collectiongem."
+  gem.name        = 'mongoid-lookup'
+  gem.summary     = "Cross-model lookup support for Mongoid"
+  gem.description = "Mongoid Lookup is an extension for the Mongoid ODM facilitating transparently maintained polymorphic document reference collections."
   gem.authors     = ['Jeff Magee']
   gem.email       = 'jmagee.osrc@gmail.com'
-  gem.homepage    = 'https://github.com/jmagee/mongoid-searchable'
+  gem.homepage    = 'https://github.com/jmagee/mongoid-lookup'
   
   gem.files        = Dir.glob("lib/**/*") + %w(README.md)
   

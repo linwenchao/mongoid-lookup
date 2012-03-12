@@ -1,20 +1,20 @@
 
-require 'mongoid_searchable/collection'
-require 'mongoid_searchable/model'
+require 'mongoid_lookup/collection'
+require 'mongoid_lookup/model'
 
 module Mongoid #:nodoc
-  module Searchable #:nodoc
+  module Lookup #:nodoc
     extend ActiveSupport::Concern
     
     module ClassMethods
       
       # Configures calling model as a search collection
-      def searchable_collection
+      def lookup_collection
         include Collection
       end
       
-      # Configures calling model as searchable
-      def searchable options
+      # Configures calling model as lookup
+      def lookup options
         include Model
       end
       

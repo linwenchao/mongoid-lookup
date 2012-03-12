@@ -1,6 +1,6 @@
 class CleanModel
 
   include Mongoid::Document
-  include Mongoid::Searchable
+  include Mongoid::Lookup
   
 end

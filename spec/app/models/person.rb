@@ -3,8 +3,8 @@ require 'search_listing'
 class Person
   
   include Mongoid::Document
-  include Mongoid::Searchable
+  include Mongoid::Lookup
   
-  searchable :collection => SearchListing
+  lookup :collection => SearchListing
   
 end

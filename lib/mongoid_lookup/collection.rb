@@ -1,6 +1,6 @@
 
 module Mongoid #:nodoc
-  module Searchable #:nodoc
+  module Lookup #:nodoc
     
     module Collection
       

@@ -1,7 +1,7 @@
 class SearchListing
   include Mongoid::Document
-  include Mongoid::Searchable
+  include Mongoid::Lookup
   
-  searchable_collection
+  lookup_collection
   
 end

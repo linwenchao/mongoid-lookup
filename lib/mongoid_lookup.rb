@@ -11,12 +11,12 @@ module Mongoid #:nodoc
       
       # Configures calling model as a lookup collection
       def lookup_collection
-        include Collection
+        include Collection unless included_modules.include?(Collection)
       end
       
       # Configures calling model as lookup
       def lookup name, options
-        include Model
+        include Model unless included_modules.include?(Model)
         build_lookup(name, options)
       end
       

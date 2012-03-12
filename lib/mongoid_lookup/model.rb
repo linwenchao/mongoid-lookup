@@ -25,7 +25,7 @@ module Mongoid #:nodoc
         # @private
         def define_lookup_reference name, options
           self.const_set("#{name.to_s.classify}Reference", Class.new(lookup_reference_parent(name, options)))
-          self.lookup_reference(name).send(:include, Reference)
+          self.lookup_reference(name).send(:include, Reference) unless included_modules.include?(Reference)
         end
         
         # lookup reference class for the given lookup name
@@ -77,7 +77,7 @@ module Mongoid #:nodoc
         #
         #
         #
-        def relate_lookup_reference klass, options
+        def relate_lookup_reference name, options
         end
       end
       

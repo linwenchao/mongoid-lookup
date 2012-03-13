@@ -16,6 +16,11 @@ describe Mongoid::Lookup::Model do
       lambda { @model::SearchReference }.should_not raise_error
     end
     
+    it 'relates Model to Reference' do
+      @model.build_lookup :search, :collection => SearchListing
+      @model.new.should respond_to(:search_reference)
+    end
+    
     context 'collection and inherit are not given' do
       it 'raises a KeyError' do
         lambda do
@@ -64,6 +69,12 @@ describe Mongoid::Lookup::Model do
   describe '.lookup_reference' do
     it 'returns the reference model for the given ref name' do
       Person.lookup_reference(:search).should eq(Person::SearchReference)
+    end
+  end
+  
+  describe 'reference relation' do
+    it 'relates to correct lookup reference model' do
+      Person.new.build_search_reference.class.should eq(Person::SearchReference)
     end
   end
   

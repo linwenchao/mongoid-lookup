@@ -24,8 +24,8 @@ module Mongoid #:nodoc
         #
         # @private
         def define_lookup_reference name, options
-          self.const_set("#{name.to_s.classify}Reference", Class.new(lookup_reference_parent(name, options)))
-          self.lookup_reference(name).send(:include, Reference) unless included_modules.include?(Reference)
+          const_set("#{name.to_s.classify}Reference", Class.new(lookup_reference_parent(name, options)))
+          lookup_reference(name).send(:include, Reference) unless included_modules.include?(Reference)
         end
         
         # lookup reference class for the given lookup name
@@ -33,7 +33,7 @@ module Mongoid #:nodoc
         # @param [String, Symbol] name
         # @return [Mongoid::Lookup::Reference]
         def lookup_reference name
-          self.const_get("#{name.to_s.classify}Reference")
+          const_get("#{name.to_s.classify}Reference")
         end
         
         # whether or not the given lookup is defined
@@ -41,7 +41,7 @@ module Mongoid #:nodoc
         # @param [String, Symbol] name
         # @return [Boolean]
         def has_lookup? name
-          self.const_defined?("#{name.to_s.classify}Reference")
+          const_defined?("#{name.to_s.classify}Reference")
         end
         
         # returns the appropriate lookup reference parent for 
@@ -63,7 +63,7 @@ module Mongoid #:nodoc
         # @param [String, Symbol] name
         # @return [Mongoid::Lookup::Reference]
         def nearest_lookup_reference name
-          (self.ancestors - self.included_modules).each do |klass|
+          (ancestors - included_modules).each do |klass|
             if klass.respond_to?(:has_lookup?)
               if klass.has_lookup? name
                 return klass.lookup_reference(name)
@@ -74,10 +74,11 @@ module Mongoid #:nodoc
           raise InheritError, "no ancestor of #{self.name} has a lookup named '#{name}'"
         end
         
+        # relate the Model to the created lookup Reference
         #
-        #
-        #
+        # @private
         def relate_lookup_reference name, options
+          has_one "#{name}_reference".to_sym, :as => :referenced, :class_name => lookup_reference(name).name
         end
       end
       

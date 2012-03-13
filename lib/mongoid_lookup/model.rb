@@ -7,6 +7,13 @@ module Mongoid #:nodoc
     module Model
       extend ActiveSupport::Concern
       
+      # create or update the lookup reference
+      #
+      #
+      def maintain_lookup_reference name
+        send("create_#{name}_reference")
+      end
+      
       module ClassMethods
         
         # Create a lookup of the given name on the host model.
@@ -17,6 +24,7 @@ module Mongoid #:nodoc
         def build_lookup name, options
           define_lookup_reference(name, options)
           relate_lookup_reference(name, options)
+          attach_lookup_reference_callback(name, options)
         end
         
         # Create a class to serve as the model for the lookup
@@ -80,8 +88,22 @@ module Mongoid #:nodoc
         def relate_lookup_reference name, options
           has_one "#{name}_reference".to_sym, :as => :referenced, :class_name => lookup_reference(name).name
         end
+        
+        # add a save hook for the given reference unless 
+        # already defined (inheriting)
+        #
+        # @private
+        def attach_lookup_reference_callback name, options
+          return if options[:inherit]
+          
+          set_callback :save, :before do
+            maintain_lookup_reference(name)
+            true
+          end
+        end
+        
       end
-      
+        
     end
     
   end

@@ -10,9 +10,9 @@ module Mongoid #:nodoc
     module ClassMethods
       
       # Configures calling model as a lookup collection
-      def lookup_collection
-        include Collection unless included_modules.include?(Collection)
-        build_lookup_collection
+      def lookup_collection options
+        include Collection
+        build_lookup_collection(options)
       end
       
       # Configures calling model as lookup

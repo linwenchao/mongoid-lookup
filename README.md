@@ -33,7 +33,7 @@ add a `has_lookup` relationship:
       include Mongoid::Document
       include Mongoid::Lookup
       
-      has_lookup :search, collection: SearchListing, :map => { label: :full_name }
+      has_lookup :search, collection: SearchListing, map: { label: :full_name }
       
       field :full_name, type: String
     end
@@ -110,8 +110,8 @@ Begin by defining a lookup on your parent class:
 
     class Tag
       include Mongoid::Lookup
-      has_lookup :search, :collection => SearchListing, :map => { :label => :name }
-      field :name, :type => String
+      has_lookup :search, collection: SearchListing, map: { label: :name }
+      field :name, type: String
     end
 
 Mongoid::Lookup allows you to directly query just for tags:
@@ -131,7 +131,7 @@ key `"#{name.to_s.classify}Reference"`:
 What if you're only interested in Places?
 
 Your `Place` model can define its own lookup. 
-Use the `:inherit => true` option in any child class
+Use the `inherit: true` option in any child class
 to create a finer grained lookup:
 
     class Place < Tag
@@ -163,7 +163,7 @@ add the desired fields to the lookup collection:
 Now update your `:map` option in your lookup declarations:
     
     class User
-      has_lookup :search, collection: SearchListing, :map => { label: :full_name, alias: :nickname }
+      has_lookup :search, collection: SearchListing, map: { label: :full_name, alias: :nickname }
       field :full_name, type: String
       field :nickname, type: String
     end
@@ -176,7 +176,7 @@ The following:
 
     class Place < Tag
 
-      has_lookup :search, inherit: true, :map => { population: :population } do
+      has_lookup :search, inherit: true, map: { population: :population } do
         # this block is evaluated 
         # in Place::SearchReference
         field :population, type: Integer
@@ -193,7 +193,7 @@ be inherited, and the new ones added:
 
     class City < Place
     
-      has_lookup :search, inherit: true, :map => { code: :zipcode } do
+      has_lookup :search, inherit: true, map: { code: :zipcode } do
         # this block is evaluated 
         # in City::SearchReference
         field :code, type: Integer
@@ -217,7 +217,7 @@ if you'd like search references to provide a `#summary` method:
     end
     
     class Place < Tag
-      has_lookup :search, inherit: true, :map => { population: :population } do
+      has_lookup :search, inherit: true, map: { population: :population } do
         field :population, type: Integer
         
         def summary

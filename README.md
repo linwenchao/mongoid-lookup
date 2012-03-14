@@ -185,7 +185,7 @@ The following:
       field :population, type: Integer
     end
     
-...adds a `#population` field to `Place::SearchReference` and maps it to `Place#population`.
+...adds a `Place::SearchReference#population` field and maps it to `Place#population`.
 This additional field and mapping will only exist to `Place` and its child classes.
 
 Anytime that you define a lookup, the parent configurations (fields and mappings) will

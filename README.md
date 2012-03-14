@@ -63,7 +63,7 @@ The lookup collection won't be particularly useful, though, until you add more m
 Documents in the lookup collection have a polymorphic relation to the source document, `referenced`:
 
     User.create(full_name: 'John Doe')
-    SearchListing.all.first.label #=> 'Jeff'
+    SearchListing.all.first.label #=> 'John Doe'
     SearchListing.all.first.referenced #=> #<User _id: 4f418f237742b50df7000001, _type: "User", name: "John Doe">
     
 To implement the search, add a scope to match the label:

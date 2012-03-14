@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   
   gem.name        = 'mongoid-lookup'
   gem.summary     = "Cross-model lookup support for Mongoid"
-  gem.description = "Mongoid Lookup is an extension for the Mongoid ODM facilitating transparently maintained polymorphic document reference collections."
+  gem.description = "Mongoid::Lookup is an extension for the Mongoid ODM providing support for cross-model document lookups."
   gem.authors     = ['Jeff Magee']
   gem.email       = 'jmagee.osrc@gmail.com'
   gem.homepage    = 'https://github.com/jmagee/mongoid-lookup'

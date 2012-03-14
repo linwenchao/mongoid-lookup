@@ -72,8 +72,7 @@ To implement the search, add a scope to match the label:
       scope :label_like, ->(query) { where(label: Regexp.new(/#{query}/i)) }
     end
     
-    query = "J"
-    SearchListing.label_like(query)
+    SearchListing.label_like("J")
     #=> [ #<User::SearchReference label: "J User">, <Group::SearchReference label: "J Group">, <Page::SearchReference label: "J Page">  ]
 
 Advanced Lookup
@@ -109,8 +108,7 @@ the scenes, Mongoid::Lookup has created a new model extending the lookup collect
 (SearchListing). You can access this model by passing the lookup key to the 
 `lookup_reference` class method:
 
-    query = 'B'
-    Tag.lookup(:search).label_like(query)
+    Tag.lookup(:search).label_like("B")
     #=> [ #<Topic::SearchReference label: "Business">, <Person::SearchReference label: "Barack Obama">, <City::SearchReference label: "Boston">  ] 
 
 Alternatively, you can access the model itself, which has been named according to the
@@ -144,12 +142,11 @@ with the same lookup key (`:search`):
 The new lookup will inherit the configuration of Tag's `:search` lookup. Now you
 can query Place references only, as needed:
 
-    query = 'C'
-    Place.lookup(:search).label_like(query)
+    Place.lookup(:search).label_like("C")
     
 or 
 
-    Place::SearchReference.label_like(query)
+    Place::SearchReference.label_like("C")
       
 ### Extending Lookup Reference Models
 

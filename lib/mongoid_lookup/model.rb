@@ -9,9 +9,40 @@ module Mongoid #:nodoc
       
       # create or update the lookup reference
       #
-      #
+      # @param [Symbol] name name of lookup reference to update
       def maintain_lookup_reference name
-        send("create_#{name}_reference")
+        if has_lookup_changes?(name)
+          attrs = lookup_reference_attributes(name)
+          
+          if ref = send("#{name}_reference")
+            ref.update_attributes(attrs)
+          else
+            send("create_#{name}_reference", attrs)
+          end
+        end
+      end
+      
+      # checks for dirty fields on the given lookup 
+      #
+      # @param [Symbol] name name of lookup to check
+      # @return [Boolean]
+      def has_lookup_changes? name
+        lookup_fields = self.class.lookup_fields(name)
+        changed_fields = changes.keys
+        (changed_fields - lookup_fields).count < changed_fields.count
+      end
+      
+      # the attributes required for the given lookup reference
+      #
+      # @param [Symbol] name name of lookup to check
+      # @return [Hash]
+      def lookup_reference_attributes name
+        {}.tap do |attrs|
+          map = self.class.lookup_reference(name).lookup_field_map.invert
+          map.keys.each do |source_field|
+            attrs[map[source_field]] = read_attribute(source_field)
+          end
+        end
       end
       
       module ClassMethods
@@ -34,6 +65,7 @@ module Mongoid #:nodoc
         def define_lookup_reference name, options
           const_set("#{name.to_s.classify}Reference", Class.new(lookup_reference_parent(name, options)))
           lookup_reference(name).send(:include, Reference) unless included_modules.include?(Reference)
+          lookup_reference(name).configure_lookup_reference(options)
         end
         
         # lookup reference class for the given lookup name
@@ -42,6 +74,15 @@ module Mongoid #:nodoc
         # @return [Mongoid::Lookup::Reference]
         def lookup_reference name
           const_get("#{name.to_s.classify}Reference")
+        end
+        
+        # the fields on the Model which map to fields on the
+        # lookup reference 
+        #
+        # @param [Symbol] name
+        # @return [Array<String>]
+        def lookup_fields(name)
+          lookup_reference(name).lookup_field_map.values.collect{ |v| v.to_s }
         end
         
         # whether or not the given lookup is defined
@@ -73,7 +114,7 @@ module Mongoid #:nodoc
         def nearest_lookup_reference name
           (ancestors - included_modules).each do |klass|
             if klass.respond_to?(:has_lookup?)
-              if klass.has_lookup? name
+              if klass.has_lookup?(name)
                 return klass.lookup_reference(name)
               end
             end

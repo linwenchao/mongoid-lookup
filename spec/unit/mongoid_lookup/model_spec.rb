@@ -16,6 +16,11 @@ describe Mongoid::Lookup::Model do
         @model.build_lookup :search, :collection => SearchListing
         lambda { @model::SearchReference }.should_not raise_error
       end
+      
+      it 'configures the lookup reference' do
+        @model.build_lookup :search, :collection => SearchListing, :map => { :x => :y }
+        @model.lookup_reference(:search).lookup_field_map.should eq(:x => :y)
+      end
     
       it 'relates Model to Reference' do
         @model.build_lookup :search, :collection => SearchListing
@@ -25,6 +30,7 @@ describe Mongoid::Lookup::Model do
       it 'attaches a save callback' do
         @doc = Person.new
         @doc.search_reference.should be_nil
+        @doc.name = 'x'
         @doc.save
         @doc.search_reference.should_not be_nil
       end
@@ -83,6 +89,54 @@ describe Mongoid::Lookup::Model do
   describe 'reference relation' do
     it 'relates to correct lookup reference model' do
       Person.new.build_search_reference.class.should eq(Person::SearchReference)
+    end
+  end
+  
+  describe '#has_lookup_changes?' do
+    before :each do
+      @p = Person.new
+      @p.name = 'x'
+      @p.save
+    end
+    
+    it 'returns false if there are no changes to the lookup map fields' do
+      @p.should_not have_lookup_changes(:search)
+    end
+    
+    it 'returns true if there are changes to the lookup map fields' do
+      @p.name = 'y'
+      @p.should have_lookup_changes(:search)
+    end
+  end
+  
+  describe '#lookup_reference_attributes' do
+    before do 
+      @p = Person.new
+      @p.name = 'x'
+    end
+    
+    it 'returns attributes for the given lookup' do
+      @p.lookup_reference_attributes(:search).should eq({
+        :label => 'x'
+      })
+    end
+  end
+  
+  describe '#save' do
+    before :each do
+      @p = Person.new
+      @p.name = 'x'
+      @p.save
+    end
+
+    it 'creates a lookup reference' do
+      @p.search_reference.label.should eq('x')
+    end
+    
+    it 'updates lookup reference' do
+      @p.name = 'y'
+      @p.save
+      @p.search_reference.reload.label.should eq('y')
     end
   end
   

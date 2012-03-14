@@ -19,7 +19,7 @@ describe Mongoid::Lookup::Model do
       
       it 'configures the lookup reference' do
         @model.build_lookup :search, :collection => SearchListing, :map => { :x => :y }
-        @model.lookup_reference(:search).lookup_field_map.should eq(:x => :y)
+        @model.lookup(:search).lookup_field_map.should eq(:x => :y)
       end
     
       it 'relates Model to Reference' do
@@ -62,7 +62,7 @@ describe Mongoid::Lookup::Model do
         end
         
         it 'evaluates block in lookup class' do
-          @model.lookup_reference(:search).fields.keys.should include('xyz')
+          @model.lookup(:search).fields.keys.should include('xyz')
         end
       end
     end
@@ -94,7 +94,7 @@ describe Mongoid::Lookup::Model do
   
   describe '.lookup_reference' do
     it 'returns the reference model for the given ref name' do
-      Person.lookup_reference(:search).should eq(Person::SearchReference)
+      Person.lookup(:search).should eq(Person::SearchReference)
     end
   end
   

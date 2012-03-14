@@ -4,7 +4,7 @@ require 'spec_helper'
 describe Mongoid::Lookup::Reference do
   
   it 'inherits referenced relation' do
-    Person.lookup_reference(:search).new.should respond_to(:referenced)
+    Person.lookup(:search).new.should respond_to(:referenced)
   end
   
   describe '.configure_lookup_reference' do

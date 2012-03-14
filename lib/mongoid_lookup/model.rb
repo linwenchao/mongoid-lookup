@@ -39,7 +39,7 @@ module Mongoid #:nodoc:
       # @return [Hash]
       def lookup_reference_attributes name
         {}.tap do |attrs|
-          map = self.class.lookup_reference(name).lookup_field_map.invert
+          map = self.class.lookup(name).lookup_field_map.invert
           map.keys.each do |source_field|
             attrs[map[source_field]] = read_attribute(source_field)
           end
@@ -65,10 +65,10 @@ module Mongoid #:nodoc:
         # @private
         def define_lookup_reference name, options, &block;
           const_set("#{name.to_s.classify}Reference", Class.new(lookup_reference_parent(name, options)))
-          lookup_reference(name).send(:include, Reference) unless included_modules.include?(Reference)
-          lookup_reference(name).configure_lookup_reference(options)
+          lookup(name).send(:include, Reference) unless included_modules.include?(Reference)
+          lookup(name).configure_lookup_reference(options)
           if block_given?
-            lookup_reference(name).class_eval(&block)
+            lookup(name).class_eval(&block)
           end
         end
         
@@ -76,7 +76,7 @@ module Mongoid #:nodoc:
         # 
         # @param [String, Symbol] name
         # @return [Mongoid::Lookup::Reference]
-        def lookup_reference name
+        def lookup name
           const_get("#{name.to_s.classify}Reference")
         end
         
@@ -86,7 +86,7 @@ module Mongoid #:nodoc:
         # @param [Symbol] name
         # @return [Array<String>]
         def lookup_fields(name)
-          lookup_reference(name).lookup_field_map.values.collect{ |v| v.to_s }
+          lookup(name).lookup_field_map.values.collect{ |v| v.to_s }
         end
         
         # whether or not the given lookup is defined
@@ -119,7 +119,7 @@ module Mongoid #:nodoc:
           (ancestors - included_modules).each do |klass|
             if klass.respond_to?(:has_lookup?)
               if klass.has_lookup?(name)
-                return klass.lookup_reference(name)
+                return klass.lookup(name)
               end
             end
           end
@@ -131,7 +131,7 @@ module Mongoid #:nodoc:
         #
         # @private
         def relate_lookup_reference name, options
-          has_one "#{name}_reference".to_sym, :as => :referenced, :class_name => lookup_reference(name).name, :dependent => :destroy
+          has_one "#{name}_reference".to_sym, :as => :referenced, :class_name => lookup(name).name, :dependent => :destroy
         end
         
         # add a save hook for the given reference unless 

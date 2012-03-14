@@ -2,6 +2,6 @@ require 'place'
 
 class Country < Place
   
-  lookup :search, :inherit => true
+  has_lookup :search, :inherit => true
   
 end

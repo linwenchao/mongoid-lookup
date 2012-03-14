@@ -18,7 +18,7 @@ module Mongoid #:nodoc:
       # Configures lookup on calling model.
       # accepts a block which will be evaluated
       # in the class of the generated lookup reference model
-      def lookup name, options, &block;
+      def has_lookup name, options, &block;
         include Model unless included_modules.include?(Model)
         build_lookup(name, options, &block)
       end

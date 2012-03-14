@@ -8,8 +8,8 @@ describe Mongoid::Lookup do
       Person.should respond_to(:lookup_collection)
     end
     
-    it 'adds .lookup' do
-      Person.should respond_to(:lookup)
+    it 'adds .has_lookup' do
+      Person.should respond_to(:has_lookup)
     end
 
   end
@@ -26,17 +26,17 @@ describe Mongoid::Lookup do
     end
     
     it 'requires a configuration' do
-      lambda { CleanModel.lookup }.should raise_error(ArgumentError)
+      lambda { CleanModel.has_lookup }.should raise_error(ArgumentError)
     end
     
     it 'passes block to model' do
       @model = Class.new
       @model.send :include, Mongoid::Document
       @model.send :include, Mongoid::Lookup
-      @model.lookup :search, :collection => SearchListing do
+      @model.has_lookup :search, :collection => SearchListing do
         field :xyz, type: String
       end
-      @model.lookup_reference(:search).fields.keys.should include('xyz')
+      @model.lookup(:search).fields.keys.should include('xyz')
     end
   end
     

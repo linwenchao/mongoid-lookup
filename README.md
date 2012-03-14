@@ -35,7 +35,7 @@ configure a lookup:
       
       # create a lookup named :search that 
       # saves to the SearchListing collection.
-      lookup :search, collection: SearchListing, :map => { label: :full_name }
+      has_lookup :search, collection: SearchListing, :map => { label: :full_name }
       
       field :full_name, type: String
     end
@@ -49,14 +49,14 @@ The lookup collection won't be particularly useful, though, until you add more m
     class Group
       include Mongoid::Document
       include Mongoid::Lookup
-      lookup :search, collection: SearchListing, map: { label: :name }
+      has_lookup :search, collection: SearchListing, map: { label: :name }
       field :name, type: String
     end
     
     class Page
       include Mongoid::Document
       include Mongoid::Lookup
-      lookup :search, collection: SearchListing, map: { label: :title }
+      has_lookup :search, collection: SearchListing, map: { label: :title }
       field :title, type: String
     end
     
@@ -99,7 +99,7 @@ Begin by defining a lookup on your parent class:
 
     class Tag
       include Mongoid::Lookup
-      lookup :search, :collection => SearchListing, :map => { :label => :name }
+      has_lookup :search, :collection => SearchListing, :map => { :label => :name }
       field :name, :type => String
     end
     
@@ -110,7 +110,7 @@ the scenes, Mongoid::Lookup has created a new model extending the lookup collect
 `lookup_reference` class method:
 
     query = 'B'
-    Tag.lookup_reference(:search).label_like(query)
+    Tag.lookup(:search).label_like(query)
     #=> [ #<Topic::SearchReference label: "Business">, <Person::SearchReference label: "Barack Obama">, <City::SearchReference label: "Boston">  ] 
 
 Alternatively, you can access the model itself, which has been named according to the
@@ -124,7 +124,7 @@ supplied as the first argument to `lookup`). If you had created a lookup called 
   class User
     include Mongoid::Document
     include Mongoid::Lookup
-    lookup :screen_name, collection: SearchListing, :map => { label: :screen_name }
+    has_lookup :screen_name, collection: SearchListing, :map => { label: :screen_name }
     field :screen_name, type: String
   end
   
@@ -138,14 +138,14 @@ Use the `:inherit => true` option in child class in a call to lookup
 with the same lookup key (`:search`):
 
     class Place < Tag
-      lookup :search, inherit: true
+      has_lookup :search, inherit: true
     end
     
 The new lookup will inherit the configuration of Tag's `:search` lookup. Now you
 can query Place references only, as needed:
 
     query = 'C'
-    Place.lookup_reference(:search).label_like(query)
+    Place.lookup(:search).label_like(query)
     
 or 
 
@@ -161,7 +161,7 @@ add the fields to the lookup collection and to the `:map` option:
     end
     
     class User
-      lookup :search, collection: SearchListing, :map => { label: :full_name, alias: :nickname }
+      has_lookup :search, collection: SearchListing, :map => { label: :full_name, alias: :nickname }
       field :full_name, type: String
       field :nickname, type: String
     end
@@ -171,7 +171,7 @@ your lookup call. It will be evaluated in the context of the child lookup refere
 The following:
 
     class Place < Tag
-      lookup :search, inherit: true, :map => { population: :population } do
+      has_lookup :search, inherit: true, :map => { population: :population } do
         field :population, type: Integer
       end
       
@@ -184,7 +184,7 @@ Anytime that you define a lookup, the parent configurations (fields and mappings
 be inherited, and the new ones added:
 
     class City < Place
-      lookup :search, inherit: true, :map => { code: :zipcode } do
+      has_lookup :search, inherit: true, :map => { code: :zipcode } do
         field :code, type: Integer
       end
     
@@ -204,7 +204,7 @@ the same manner, but provide model specific details:
     end
     
     class Place < Tag
-      lookup :search, inherit: true, :map => { population: :population } do
+      has_lookup :search, inherit: true, :map => { population: :population } do
         field :population, type: Integer
         
         def summary

@@ -27,22 +27,33 @@ To begin, define a collection to use as a root for your lookup:
     end
     
 Next, for each model you'd like to reference in the `SearchListing` collection,
-configure a lookup:
+add a `has_lookup` relationship:
 
     class User
       include Mongoid::Document
       include Mongoid::Lookup
       
-      # create a lookup named :search that 
-      # saves to the SearchListing collection.
       has_lookup :search, collection: SearchListing, :map => { label: :full_name }
       
       field :full_name, type: String
     end
     
-Mongoid::Lookup will now maintain a reference document in the `search_listing` collection.
-Its `#label` will be `User#full_name`. Whenever the user changes its name, the 
-search reference will be updated.
+`has_lookup` does more than just add a relation to `SearchListing`. It actually creates
+a new model extending `SearchListing`, which you can access by passing the name of the relation
+to the `lookup` method:
+
+    User.lookup(:search) #=> User::SearchReference
+    User::SearchReference.superclass #=> SearchListing
+    
+Mongoid::Lookup will now maintain a reference document through the `User#search_reference` relation.
+The `:map` option matches fields in `User::SearchReference` to fields in `User`.
+`User::SearchReference#label` will be `User#full_name`. Whenever the user changes its name, 
+its `#search_reference` will be updated:
+
+    user = User.create(full_name: 'John Doe')
+    user.search_reference #=> #<User::SearchReference label: "John Doe">
+    user.update_attributes(full_name: "Jack Doe")
+    user.search_reference.reload #=> #<User::SearchReference label: "Jack Doe">
 
 The lookup collection won't be particularly useful, though, until you add more models:
 
@@ -60,13 +71,14 @@ The lookup collection won't be particularly useful, though, until you add more m
       field :title, type: String
     end
     
-Documents in the lookup collection have a polymorphic relation to the source document, `referenced`:
+References in the lookup collection relate back to the source document, `referenced`:
 
     User.create(full_name: 'John Doe')
-    SearchListing.all.first.label #=> 'John Doe'
-    SearchListing.all.first.referenced #=> #<User _id: 4f418f237742b50df7000001, _type: "User", name: "John Doe">
+    listing = SearchListing.all.first
+    listing.referenced #=> #<User _id: 4f418f237742b50df7000001, _type: "User", name: "John Doe">
     
-To implement the search, add a scope to match the label:
+Now, you can add whatever functionality desired to your lookup collection. In our example,
+we'd like to implement cross-model search:
 
     class SearchListing
       scope :label_like, ->(query) { where(label: Regexp.new(/#{query}/i)) }
@@ -78,7 +90,7 @@ To implement the search, add a scope to match the label:
 Advanced Lookup
 ---------------
 
-Building on the simple example, suppose you have a structured tagging system:
+Building on the simple search example, suppose you have a structured tagging system:
 
     class Tag
       include Mongoid::Document
@@ -90,9 +102,9 @@ Building on the simple example, suppose you have a structured tagging system:
     class Region < Place; end
     class Country < Place; end
     
-Sometimes you want results across all models (User, Group, Page, Tag)
-but at other times you only want Tags or Places. Mongoid makes type filtering
-easy, and Mongoid::Lookup leverages this feature.
+Sometimes you'll want results across all models (User, Group, Page, Tag)
+but at other times you may only be interested in Tags, or even just Places. 
+Mongoid makes type filtering easy, and Mongoid::Lookup leverages this feature.
 
 Begin by defining a lookup on your parent class:
 
@@ -101,39 +113,26 @@ Begin by defining a lookup on your parent class:
       has_lookup :search, :collection => SearchListing, :map => { :label => :name }
       field :name, :type => String
     end
-    
-As is, documents in the `search_listing` collection will already reference all of Tag's child classes.
-Additionally, Mongoid::Lookup allows you to directly query just for tags. Behind 
-the scenes, Mongoid::Lookup has created a new model extending the lookup collection 
-(SearchListing). You can access this model by passing the lookup key to the 
-`lookup_reference` class method:
+
+Mongoid::Lookup allows you to directly query just for tags:
 
     Tag.lookup(:search).label_like("B")
     #=> [ #<Topic::SearchReference label: "Business">, <Person::SearchReference label: "Barack Obama">, <City::SearchReference label: "Boston">  ] 
 
-Alternatively, you can access the model itself, which has been named according to the
-given key:
+Alternatively, you can access the model by its constant, which has been named according to the
+key `"#{name.to_s.classify}Reference"`:
 
     Tag::SearchReference.label_like(query)
 
-The reference model name is `"#{name.to_s.classify}Reference"` (where `name` is the key
-supplied as the first argument to `lookup`). If you had created a lookup called `screen_name`:
-
-    class User
-      include Mongoid::Document
-      include Mongoid::Lookup
-      has_lookup :screen_name, collection: SearchListing, :map => { label: :screen_name }
-      field :screen_name, type: String
-    end
-  
-The lookup reference would be `User::ScreenNameReference`
+`has_lookup :screen_name` would generate a reference model `Tag::ScreenNameReference`:
 
 ### Lookup Inheritance 
 
-Anywhere in your class structure that you add a lookup, another lookup reference
-model will be created, allowing you to further narrow your results.
-Use the `:inherit => true` option in child class in a call to lookup 
-with the same lookup key (`:search`):
+What if you're only interested in Places?
+
+Your `Place` model can define its own lookup. 
+Use the `:inherit => true` option in any child class
+to create a finer grained lookup:
 
     class Place < Tag
       has_lookup :search, inherit: true
@@ -143,19 +142,25 @@ The new lookup will inherit the configuration of Tag's `:search` lookup. Now you
 can query Place references only, as needed:
 
     Place.lookup(:search).label_like("C")
+    #=> [ #<Country::SearchReference label: "Canada">, <Region::SearchReference label: "California">, <City::SearchReference label: "Carson City">  ] 
     
 or 
 
     Place::SearchReference.label_like("C")
+    
+This does not effect SearchListing or Tag::SearchReference. Mongoid knows
+hows to limit the query.
       
 ### Extending Lookup Reference Models
 
 If you would like your lookup references to maintain more data from your source model,
-add the fields to the lookup collection and to the `:map` option:
+add the desired fields to the lookup collection:
 
     class SearchListing
       field :alias, type: String
     end
+    
+Now update your `:map` option in your lookup declarations:
     
     class User
       has_lookup :search, collection: SearchListing, :map => { label: :full_name, alias: :nickname }
@@ -163,40 +168,49 @@ add the fields to the lookup collection and to the `:map` option:
       field :nickname, type: String
     end
 
-When you would like to include fields that only pertain to certain models, pass a block to
-your lookup call. It will be evaluated in the context of the child lookup reference class. 
+If you would like to include fields that only pertain to certain models, pass a block to
+your `has_lookup` call. It will be evaluated in the context of the reference class. 
 The following:
 
     class Place < Tag
+
       has_lookup :search, inherit: true, :map => { population: :population } do
+        # this block is evaluated 
+        # in Place::SearchReference
         field :population, type: Integer
       end
       
       field :population, type: Integer
     end
     
-...adds a `#population` field to `Place::SearchListing` and maps it to `Place#population`.
+...adds a `#population` field to `Place::SearchReference` and maps it to `Place#population`.
 This additional field and mapping will only exist to `Place` and its child classes.
+
 Anytime that you define a lookup, the parent configurations (fields and mappings) will
 be inherited, and the new ones added:
 
     class City < Place
+    
       has_lookup :search, inherit: true, :map => { code: :zipcode } do
+        # this block is evaluated 
+        # in City::SearchReference
         field :code, type: Integer
       end
     
       field :zipcode, type: Integer
     end
     
-Here, `City::SearchListing` will maintain `#label`, `#population`, and `#code`.
+`City::SearchReference` will maintain `#label`, `#population`, and `#code`, as per mappings
+given in `Tag`, `Place`, and `City`.
 
-The ability to subclass lookup results allows for some flexibility. 
-For instance, if you would like to deal with all SearchListings in 
-the same manner, but provide model specific details:
+The ability to subclass lookup references allows for some flexibility. For instance,
+if you'd like search references to provide a `#summary` method:
 
     class SearchListing
+      lookup_collection
+    
       def summary
-        I18n.t("resource_labels.#{referenced_type}")
+        referenced_type.name
       end
     end
     
@@ -210,18 +224,24 @@ the same manner, but provide model specific details:
       end
     end
 
+    Topic.create(title: "Politics")
+    City.create(name: 'New York City', population: 8125497)
+    
     SearchListing.all.each do |listing|
       puts "#{listing.label} + (#{listing.summary})"
     end
     
+    #=> "Politics (Topic)"
+    #=> "New York City (City of population 8125497)"
+    
 Notes
 -----
 
-Presumably, write heavy fields aren't great candidates for lookup. Every time that
+Presumably, write heavy fields aren't great candidates for lookup. Every time
 the field changes, the lookup reference will have to be updated.
 
 The update currently takes place in a `before_save` callback. If performance were a
-concern, ideally this could instead create a delayed job to update the lookup.
+concern, the hook could instead create a delayed job to update the lookup (not currently supported).
 
 Authors
 -------

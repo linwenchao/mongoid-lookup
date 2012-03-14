@@ -167,6 +167,8 @@ Now update your `:map` option in your lookup declarations:
       field :full_name, type: String
       field :nickname, type: String
     end
+    
+The `#search_reference` will be updated whenever `#full_name` or `#nickname` are changed.
 
 If you would like to include fields that only pertain to certain models, pass a block to
 your `has_lookup` call. It will be evaluated in the context of the reference class. 

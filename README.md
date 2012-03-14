@@ -119,12 +119,12 @@ given key:
 The reference model name is `"#{name.to_s.classify}Reference"` (where `name` is the key
 supplied as the first argument to `lookup`). If you had created a lookup called `screen_name`:
 
-  class User
-    include Mongoid::Document
-    include Mongoid::Lookup
-    has_lookup :screen_name, collection: SearchListing, :map => { label: :screen_name }
-    field :screen_name, type: String
-  end
+    class User
+      include Mongoid::Document
+      include Mongoid::Lookup
+      has_lookup :screen_name, collection: SearchListing, :map => { label: :screen_name }
+      field :screen_name, type: String
+    end
   
 The lookup reference would be `User::ScreenNameReference`
 

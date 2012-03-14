@@ -1,13 +1,14 @@
 
-module Mongoid #:nodoc
-  module Lookup #:nodoc
+module Mongoid #:nodoc:
+  module Lookup #:nodoc:
 
     class InheritError < StandardError; end
     
     module Model
       extend ActiveSupport::Concern
       
-      # create or update the lookup reference
+      # create or update the lookup reference if 
+      # changes are present
       #
       # @param [Symbol] name name of lookup reference to update
       def maintain_lookup_reference name
@@ -52,8 +53,8 @@ module Mongoid #:nodoc
         # @param [Symbol] name name of lookup
         # @param [Hash] options
         # @option options [Mongoid::Document] :collection
-        def build_lookup name, options
-          define_lookup_reference(name, options)
+        def build_lookup name, options, &block;
+          define_lookup_reference(name, options, &block)
           relate_lookup_reference(name, options)
           attach_lookup_reference_callback(name, options)
         end
@@ -62,10 +63,13 @@ module Mongoid #:nodoc
         # reference. Const is set within the current model.
         #
         # @private
-        def define_lookup_reference name, options
+        def define_lookup_reference name, options, &block;
           const_set("#{name.to_s.classify}Reference", Class.new(lookup_reference_parent(name, options)))
           lookup_reference(name).send(:include, Reference) unless included_modules.include?(Reference)
           lookup_reference(name).configure_lookup_reference(options)
+          if block_given?
+            lookup_reference(name).class_eval(&block)
+          end
         end
         
         # lookup reference class for the given lookup name

@@ -1,6 +1,6 @@
 
-module Mongoid #:nodoc
-  module Lookup #:nodoc
+module Mongoid #:nodoc:
+  module Lookup #:nodoc:
     
     module Reference
       extend ActiveSupport::Concern

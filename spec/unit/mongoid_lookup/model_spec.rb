@@ -53,6 +53,18 @@ describe Mongoid::Lookup::Model do
           @model_2::SearchReference.superclass.should eq(@model::SearchReference)
         end
       end
+      
+      context 'block given' do
+        before do
+          @model.build_lookup :search, :collection => SearchListing do
+            field :xyz, :type => String
+          end
+        end
+        
+        it 'evaluates block in lookup class' do
+          @model.lookup_reference(:search).fields.keys.should include('xyz')
+        end
+      end
     end
 
     context 'invalid' do

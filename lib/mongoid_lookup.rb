@@ -3,8 +3,8 @@ require 'mongoid_lookup/collection'
 require 'mongoid_lookup/model'
 require 'mongoid_lookup/reference'
 
-module Mongoid #:nodoc
-  module Lookup #:nodoc
+module Mongoid #:nodoc:
+  module Lookup #:nodoc:
     extend ActiveSupport::Concern
     
     module ClassMethods
@@ -15,10 +15,12 @@ module Mongoid #:nodoc
         build_lookup_collection
       end
       
-      # Configures calling model as lookup
-      def lookup name, options
+      # Configures lookup on calling model.
+      # accepts a block which will be evaluated
+      # in the class of the generated lookup reference model
+      def lookup name, options, &block;
         include Model unless included_modules.include?(Model)
-        build_lookup(name, options)
+        build_lookup(name, options, &block)
       end
       
     end

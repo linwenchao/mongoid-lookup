@@ -28,6 +28,16 @@ describe Mongoid::Lookup do
     it 'requires a configuration' do
       lambda { CleanModel.lookup }.should raise_error(ArgumentError)
     end
+    
+    it 'passes block to model' do
+      @model = Class.new
+      @model.send :include, Mongoid::Document
+      @model.send :include, Mongoid::Lookup
+      @model.lookup :search, :collection => SearchListing do
+        field :xyz, type: String
+      end
+      @model.lookup_reference(:search).fields.keys.should include('xyz')
+    end
   end
     
 end

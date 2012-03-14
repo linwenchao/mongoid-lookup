@@ -102,6 +102,12 @@ describe Mongoid::Lookup::Model do
     it 'relates to correct lookup reference model' do
       Person.new.build_search_reference.class.should eq(Person::SearchReference)
     end
+    
+    it 'is dependent => destroy' do
+      person = Person.create(:name => "x")
+      person.destroy
+      Person::SearchReference.count.should eq(0)
+    end
   end
   
   describe '#has_lookup_changes?' do

@@ -131,7 +131,7 @@ module Mongoid #:nodoc:
         #
         # @private
         def relate_lookup_reference name, options
-          has_one "#{name}_reference".to_sym, :as => :referenced, :class_name => lookup_reference(name).name
+          has_one "#{name}_reference".to_sym, :as => :referenced, :class_name => lookup_reference(name).name, :dependent => :destroy
         end
         
         # add a save hook for the given reference unless 

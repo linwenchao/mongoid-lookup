@@ -1,4 +1,3 @@
-
 module Mongoid #:nodoc:
   module Lookup #:nodoc:
 
@@ -16,7 +15,17 @@ module Mongoid #:nodoc:
           attrs = lookup_reference_attributes(name)
           
           if ref = send("#{name}_reference")
-            ref.update_attributes(attrs)
+            #ref.update_attributes(attrs)
+            attrs.each do |k,v|
+              access = k.to_s
+              localized = ref.fields[access].try(:localized?)
+              if localized
+                ref.send("#{k}_translations=", v)
+              else
+                ref.send("#{k}=", v)
+              end
+            end
+            ref.save
           else
             send("create_#{name}_reference", attrs)
           end

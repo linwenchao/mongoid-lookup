@@ -1,4 +1,3 @@
-
 Gem::Specification.new do |gem|
 
   gem.version     = File.read('VERSION').chomp
@@ -13,10 +12,10 @@ Gem::Specification.new do |gem|
   
   gem.files        = Dir.glob("lib/**/*") + %w(README.md)
   
-  gem.add_dependency("mongoid", ["~> 2.4"])
+  gem.add_dependency("mongoid", [">= 2.4"])
   
-  gem.add_development_dependency("rspec",       ["~> 2.6"])
-  gem.add_development_dependency('redcarpet',   ['~> 2.1'])
+  gem.add_development_dependency("rspec",       [">= 2.6"])
+  gem.add_development_dependency('redcarpet',   ['>= 2.1'])
   gem.add_development_dependency('yard',        ['>= 0.7.5'])
 
 end
